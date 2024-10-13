@@ -30,7 +30,7 @@ variables before running the application.
 
 ## Development
 
-New classifier should extend one of two classes - specially methods:
+New classifier should extend one of two classes:
 
 * [
   `BaseClassifierClassifyAndTrain`](./src/main/java/flinkClassifiersTesting/classifiers/base/BaseClassifierClassifyAndTrain.java)
