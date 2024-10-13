@@ -26,7 +26,6 @@ variables before running the application.
 | `RESULTS_DIRECTORY`  | Directory for placing classification results from Flink | Yes      | `/home/userxyz/resultsDir`            |
 | `FLINK_ADDRESS`      | URL of Flink cluster for API calls                      | No       | `localhost`                           |
 | `FLINK_PORT`         | Port of Flink cluster for API calls                     | No       | `8081`                                |
-|
 
 ## Development
 
