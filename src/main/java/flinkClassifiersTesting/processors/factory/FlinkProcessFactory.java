@@ -12,6 +12,7 @@ import org.apache.flink.core.fs.Path;
 import org.apache.flink.formats.csv.CsvReaderFormat;
 import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import org.apache.flink.streaming.api.datastream.DataStream;
+import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import flinkClassifiersTesting.classifiers.base.BaseClassifier;
 import flinkClassifiersTesting.inputs.PlainExample;
@@ -58,10 +59,7 @@ public class FlinkProcessFactory {
 
             FileSink<String> fileSink = FileSink.<String>forRowFormat(new Path(currentSinkPath), new SimpleStringEncoder<>("UTF-8")).build();
 
-            stream.map(classificationResult -> {
-                String fields = classificationResult.performances.stream().map(tuple -> tuple.f1.toString()).collect(Collectors.joining(","));
-                return classificationResult.timestamp + "," + classificationResult.exampleClass + "," + classificationResult.predicted + "," + fields;
-            }).sinkTo(fileSink);
+            mapClassificationResultsToString(stream).sinkTo(fileSink);
 
             System.out.println("Running: " + processFunctionsFromParametersFactory.getName() + ", params: " + processFunctionParams);
 
@@ -137,5 +135,12 @@ public class FlinkProcessFactory {
         CsvReaderFormat<PlainExample> format = CsvReaderFormat.forSchema(CsvSchema.builder().setSkipFirstDataRow(true).addArrayColumn("attributes", "#").addColumn("plainClass").build(), TypeInformation.of(PlainExample.class));
 
         return FileSource.forRecordStreamFormat(format, Path.fromLocalFile(new File(filepath))).build();
+    }
+
+    private static SingleOutputStreamOperator<String> mapClassificationResultsToString(DataStream<ClassificationResult> stream) {
+        return stream.map(classificationResult -> {
+            String fields = classificationResult.performances.stream().map(tuple -> tuple.f1.toString()).collect(Collectors.joining(","));
+            return String.join(",", classificationResult.timestamp, classificationResult.exampleClass, classificationResult.predicted, fields);
+        }).name("mapClassificationResultsToString");
     }
 }
