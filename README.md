@@ -17,9 +17,6 @@ have to setup env variables (see [Configuration](#configuration) - set them up i
 
 ## Configuration
 
-Below is the required environment configuration to run this project. Make sure to set up the necessary environment
-variables before running the application.
-
 | Environment Variable | Description                                             | Required | Default Value / Example (if required) |
 |----------------------|---------------------------------------------------------|----------|---------------------------------------|
 | `FLINK_BIN_PATH`     | Absolute path for binaries of Flink 1.19.1              | Yes      | `/home/userxyz/flink-1.19.1/bin`      |
