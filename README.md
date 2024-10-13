@@ -1,39 +1,58 @@
-# Environment for testing classifiers in Flink
+# Environment for Testing Classifiers in Flink
+
+This project provides an environment to test classifiers in **Apache Flink**.
 
 ## Requirements
 
-* Java 11
-* Apache Flink 1.19.1
+- **Java 11**
+- **Apache Flink 1.19.1**
 
 ## Execution
 
-1) Build a JAR using `maven clean package`
-2) Run it using `flink run <path to jar>`
+1. Build the JAR file using the following Maven command:
 
-You can use predefined execution configuration from Intellij - `Deploy Flink App` or `Deploy Flink App & Plot` but you
-have to setup env variables (see [Configuration](#configuration) - set them up in Intellij run configuration):
+    ```bash
+    mvn clean package
+    ```
 
-![Alt text](./readme/how-to-edit-flink-run-configuration.png)
+2. Run the JAR using Flink:
+
+    ```bash
+    flink run <path-to-jar>
+    ```
+
+Alternatively, you can use the predefined execution configurations in IntelliJ:
+
+- **Deploy Flink App**
+- **Deploy Flink App & Plot**
+
+> **Note:** You need to configure environment variables in IntelliJ's run configuration (
+> see [Configuration](#configuration)).
+
+![IntelliJ Flink Run Configuration](./readme/how-to-edit-flink-run-configuration.png)
 
 ## Configuration
 
-| Environment Variable | Description                                             | Required | Default Value / Example (if required) |
-|----------------------|---------------------------------------------------------|----------|---------------------------------------|
-| `FLINK_BIN_PATH`     | Absolute path for binaries of Flink 1.19.1              | Yes      | `/home/userxyz/flink-1.19.1/bin`      |
-| `RESULTS_DIRECTORY`  | Directory for placing classification results from Flink | Yes      | `/home/userxyz/resultsDir`            |
-| `FLINK_ADDRESS`      | URL of Flink cluster for API calls                      | No       | `localhost`                           |
-| `FLINK_PORT`         | Port of Flink cluster for API calls                     | No       | `8081`                                |
+| Environment Variable | Description                                          | Required | Default Value / Example (if required) |
+|----------------------|------------------------------------------------------|----------|---------------------------------------|
+| `FLINK_BIN_PATH`     | Absolute path of Flink 1.19.1 binaries               | Yes      | `/home/userxyz/flink-1.19.1/bin`      |
+| `RESULTS_DIRECTORY`  | Directory for placing Flink's classification results | Yes      | `/home/userxyz/resultsDir`            |
+| `FLINK_ADDRESS`      | URL of Flink cluster for API calls                   | No       | `localhost`                           |
+| `FLINK_PORT`         | Port of Flink cluster for API calls                  | No       | `8081`                                |
 
 ## Development
 
-New classifier should extend one of two classes:
+### Classifier
 
-* [
-  `BaseClassifierClassifyAndTrain`](./src/main/java/flinkClassifiersTesting/classifiers/base/BaseClassifierClassifyAndTrain.java)
-* [
-  `BaseClassifierTrainAndClassify`](./src/main/java/flinkClassifiersTesting/classifiers/base/BaseClassifierTrainAndClassify.java)
+To implement a new classifier, extend one of the following base classes:
 
-Next you have to create classifier operator definition method extending one of two classes:
+- [`BaseClassifierClassifyAndTrain`](./src/main/java/flinkClassifiersTesting/classifiers/base/BaseClassifierClassifyAndTrain.java)
+- [`BaseClassifierTrainAndClassify`](./src/main/java/flinkClassifiersTesting/classifiers/base/BaseClassifierTrainAndClassify.java)
+
+
+### Classifier operator
+
+Next, create a method to define your classifier operator, extending one of these classes:
 
 * [
   `BaseProcessFunctionClassifyAndTrain`](./src/main/java/flinkClassifiersTesting/processors/base/BaseProcessFunctionClassifyAndTrain.java)
@@ -44,33 +63,30 @@ See for example [`HoeffdingTree`](./src/main/java/flinkClassifiersTesting/classi
 and [
 `VfdtProcessFunction`](./src/main/java/flinkClassifiersTesting/processors/hoeffding/VfdtProcessFunction.java).
 
-<b>Important notice</b>
-
 ### Important notice
 
-1) `registerClassifier` method from [
-   `BaseProcessFunctionClassifyAndTrain`](./src/main/java/flinkClassifiersTesting/processors/base/BaseProcessFunctionClassifyAndTrain.java) /
-   [
-   `BaseProcessFunctionTrainAndClassify`](./src/main/java/flinkClassifiersTesting/processors/base/BaseProcessFunctionTrainAndClassify.java)
-   is pretty generic - it cannot be templated because `TypeInformation<C>` requires concrete class
-2) For easier invocation of operators you can provide `ProcessFunction` factory - see `vfdt(...)` method from  [
-   `VfdtProcessFactory`](./src/main/java/flinkClassifiersTesting/processors/factory/vfdt/VfdtProcessFactory.java) and
-   then example of classifier invocations in `main()` of [
-   `DataStreamJob`](./src/main/java/flinkClassifiersTesting/DataStreamJob.java)
+1. The `registerClassifier` method from [`BaseProcessFunctionClassifyAndTrain`](./src/main/java/flinkClassifiersTesting/processors/base/BaseProcessFunctionClassifyAndTrain.java) and [`BaseProcessFunctionTrainAndClassify`](./src/main/java/flinkClassifiersTesting/processors/base/BaseProcessFunctionTrainAndClassify.java) is generic, as `TypeInformation<C>` requires a concrete class.
 
+2. For easier invocation of operators, provide a `ProcessFunction` factory. For example, see the `vfdt(...)` method in [`VfdtProcessFactory`](./src/main/java/flinkClassifiersTesting/processors/factory/vfdt/VfdtProcessFactory.java) and the classifier invocations in the `main()` method of [`DataStreamJob`](./src/main/java/flinkClassifiersTesting/DataStreamJob.java).
 ## Datasets
 
-* Dataset file should be in `.csv` format
-* Each file should be formatted into:
-    * headers row is standard comma separated one (e.g.
-      `feat_1,feat_2,feat_3,feat_4,feat_5,feat_6,feat_7,feat_8,target`)
-    * each data rows consist of list of attributes and class at the end - attributes should be separated by `#` and
-      class by comma (e.g. `19.8#14.0#1019.6#8.4#9.9#15.9#28.9#14.0,0`)
-* You should inquire class encoder `String -> Int` in file `<dataset>.txt` in same directory as `<dataset>.csv` -
-  example of file for binary classification problem (`yes` and `no` are real class names from `<dataset>.csv` rows):
-  ```
-  yes 1
-  no 0
-  ``` 
-* You can use [
-  `dataset_file_formatter`](./misc/dataset_file_formatter.py) script to format any dataset
+The dataset files used should follow these conventions:
+
+- **Format:** `.csv`
+- **Headers:** The first row should be a standard comma-separated list of features (e.g., `feat_1,feat_2,...,target`).
+- **Data Rows:** Each row should list the feature values separated by `#` and the class label separated by a comma (e.g., `19.8#14.0#1019.6#8.4#9.9#15.9#28.9#14.0,0`).
+
+### Class Encoders
+
+For the class labels, you must provide a corresponding `.txt` file in the same directory as the dataset. This file should map the class names to integer values. Example for a binary classification dataset:
+
+**`<dataset>.txt`:**
+
+```
+yes 1
+no 0
+```
+
+### Dataset Formatter Script
+
+You can use the [`dataset_file_formatter`](./misc/dataset_file_formatter.py) script to format any dataset into the required structure.
