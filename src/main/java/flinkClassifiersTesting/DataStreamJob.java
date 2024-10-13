@@ -25,12 +25,31 @@ import flinkClassifiersTesting.processors.factory.vfdt.VfdtProcessFactory;
 import flinkClassifiersTesting.processors.factory.vfdt.VfdtClassifierParams;
 import flinkClassifiersTesting.processors.factory.vfdt.WindowedDetectorVfdtClassifierParams;
 
+import java.io.File;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.List;
 
 public class DataStreamJob {
+    private static String getBaseDirectory() throws URISyntaxException {
+        URI jarUri = DataStreamJob.class
+                .getProtectionDomain()
+                .getCodeSource()
+                .getLocation()
+                .toURI();
+        File file = new File(jarUri);
+
+        File parentDirectory = file.getParentFile();
+
+        File parentOfParentDirectory = parentDirectory.getParentFile();
+
+        return parentOfParentDirectory.getAbsolutePath();
+    }
+
     public static void main(String[] args) throws Exception {
+        String basePath = getBaseDirectory();
         String dataset = "elec";
-        String datasetPath = "/home/deikare/wut/streaming-datasets-formatted/" + dataset + ".csv";
+        String datasetPath = basePath + "/datasets/" + dataset + ".csv";
         long bootstrapSamplesLimit = 100L;
 
         List<VfdtClassifierParams> vfdtParams = List.of(new VfdtClassifierParams(0.2, 0.1, 50));
