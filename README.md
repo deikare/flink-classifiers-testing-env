@@ -26,8 +26,7 @@ Alternatively, you can use the predefined execution configurations in IntelliJ:
 - **Deploy Flink App**
 - **Deploy Flink App & Plot**
 
-> **Note:** You need to configure environment variables in IntelliJ's run configuration (
-> see [Configuration](#configuration)).
+> **Note:** You need to configure environment variables in IntelliJ's run configuration (see [Configuration](#configuration)).
 
 ![IntelliJ Flink Run Configuration](./readme/how-to-edit-flink-run-configuration.png)
 
